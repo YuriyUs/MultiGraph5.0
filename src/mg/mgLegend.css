@@ -1,0 +1,39 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Dec 25, 2015, 6:27:18 PM
+    Author     : xx
+*/
+
+
+/* focused cell (keyboard navigation) */
+/*
+.table-view:focused:row-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:focused {
+    -fx-background-color: -fx-background, -fx-cell-focus-inner-border, #cce6ff;
+    -fx-background-insets: 0, 1, 2;
+}
+*/
+
+/*******************************************************************************
+ *                                                                             *
+ * TableView                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: #cce6ff;
+    -fx-border-color: #0000ff;
+    
+}
+
+.tableview_incomplete_legend .text {
+    -fx-strikethrough: true;
+}
+
+.tableview_completed_legend .text {
+    -fx-strikethrough: false;
+}
