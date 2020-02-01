@@ -13,17 +13,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import static javafx.scene.layout.StackPane.setAlignment;
-import static javafx.scene.layout.StackPane.setMargin;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 /**
@@ -105,24 +96,45 @@ public class MultiGraphCustomView extends BorderPane {
         this.setAlignment(this, Pos.CENTER);
         this.setStyle("-fx-border-color: red");
         this.setMouseTransparent(true);
+ 
         
-//        NewChartBounds = new Rectangle();
-//        NewChartBounds.widthProperty().bind(chartPane.widthProperty().subtract(baseChart.getYAxis().getBoundsInParent().getWidth()+baseChart.getYAxis().getWidth()/2));
-//        NewChartBounds.heightProperty().bind(chartPane.heightProperty().subtract(baseChart.getXAxis().getBoundsInParent().getHeight()+baseChart.getXAxis().getHeight()-0.5));
-//        NewChartBounds.setStroke(Color.BLUE);
-//        NewChartBounds.setFill(Color.TRANSPARENT);
-//        NewChartBounds.setX(baseChart.getYAxis().getBoundsInParent().getMaxX()-0.5 + baseChart.getYAxis().getLayoutX()/2);
-//        NewChartBounds.setY(baseChart.getXAxis().getHeight()/2);
-//        getChildren().add(NewChartBounds);
-        
-        //System.out.println("left="+left+" right="+right+" top="+top+"/"+baseChart.getXAxis().getWidth()+" bottom="+bottom+"contentBackground.getLayoutBounds() "+contentBackground.getLayoutBounds());
-        //System.out.println("Y "+baseChart.getYAxis().getBoundsInParent().getWidth());
-        //System.out.println("Y "+baseChart.getYAxis().getWidth());
-        
-
-        bindMouseEvents();
     }
     
+    public void customize(LineChart chart){
+        
+        hooverChart = chart;
+        bindMouseEvents(hooverChart);
+    }
+    
+    private void bindMouseEvents(LineChart hooverChart){
+       
+        hooverChart.setOnMouseDragged((MouseEvent event) -> {
+            
+            //if (chartPropertyMap.get(hooverChart).getChartHoover() == true){
+
+                Long xValueLong = Math.round((double)hooverChart.getXAxis().getValueForDisplay(event.getX()));
+                Long yValueLong = Math.round((double)hooverChart.getYAxis().getValueForDisplay(event.getY()));
+
+                final NumberAxis xAxis = (NumberAxis)hooverChart.getXAxis();
+                final NumberAxis yAxis = (NumberAxis)hooverChart.getYAxis();
+                //double xOffset = xAxis.localToScene();
+                double upperBound = yAxis.getUpperBound();
+                double lowerBound = yAxis.getLowerBound();
+                if (abs(upperBound) > abs(lowerBound)){
+                    yAxis.setAutoRanging(false);
+                    yAxis.setUpperBound(upperBound - 10);
+                    yAxis.setLowerBound(-upperBound+10);
+                } else{
+                    yAxis.setAutoRanging(false);
+                    yAxis.setUpperBound(abs(lowerBound)-10);
+                    yAxis.setLowerBound(-abs(lowerBound)+10);
+                }
+
+                System.out.println("X="+xValueLong+" Y="+yValueLong);
+                //System.out.println("x="+x+" y="+y+" top="+top+" left="+left+" bottom="+bottom+" right="+right);
+                //chartPane.setMargin(this, new Insets(15,15,15,15));
+            //} else System.out.println("lineChart="+hooverChart);
+        });
     private void bindMouseEvents(){
 //        chartPane.setOnMouseDragged((MouseEvent event) -> {
 //            
