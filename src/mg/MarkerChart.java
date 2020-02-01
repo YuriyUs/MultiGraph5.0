@@ -25,6 +25,7 @@ import javafx.scene.shape.Line;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.CustomMenuItem;
@@ -42,7 +43,7 @@ public class MarkerChart extends StackPane {
     private       LineChart baseChart; // is the first from the follwing list of charts
     private       LineChart hooverChart = null; // is the chart under cursor
     private final ObservableList<LineChart> multiChart = FXCollections.observableArrayList();
-    private final Map<LineChart, Color> chartColorMap = new HashMap<>();
+    //private final Map<LineChart, Color> chartColorMap = new HashMap<>();
     private       ChartLegend legend;
     private       Side legendSide= Side.BOTTOM;
     private final double yAxisWidth = 60;
@@ -54,8 +55,8 @@ public class MarkerChart extends StackPane {
     private double strokeWidthNorm = 0.3;
     private double strokeWidthBold = 1.1;
     //private       LineChart hooveredChart; // Chart under cursor
-    private       Map<LineChart, Boolean> chartHooverMap = new HashMap<>(); // Chart under cursor
-    private       Map<LineChart, GrProperty> chartPropertyMap = new HashMap<>(); // Chart under cursor
+    //private       Map<LineChart, Boolean> chartHooverMap = new HashMap<>(); // Chart under cursor
+    private       Map<LineChart, GrProperty> chartPropertyMap = new HashMap<>(); 
     // chart can work in two modes. LineChart and Marker, where user can define markers for line.
     private enum ChartModes {
                    MARKER, // marker mode. works only with markers
@@ -122,11 +123,19 @@ public class MarkerChart extends StackPane {
         
 
         final Node mChart = chart.lookup(".chart-plot-background");
+        //System.out.println("main mChart="+ mChart);
         for (Node n: mChart.getParent().getChildrenUnmodifiable()) {
             if (n != mChart && n != xAxis && n != yAxis) {
                 n.setMouseTransparent(true);
             }
         }
+        
+//        System.out.println("Content of mChart -------------");
+//        mChart.lookupAll("*").forEach(N -> {
+//            System.out.println(N);
+//        });
+//        System.out.println("end of mChart -------------");
+        
         mChart.setCursor(Cursor.NONE);
         mChart.setOnMousePressed((MouseEvent event) -> {
 
@@ -139,9 +148,11 @@ public class MarkerChart extends StackPane {
                 markerModeChart = (LineChart)((ChartLegend.UserData)cb.getUserData()).chart;
                 markerModeChart.getData().add(1, new LineChart.Series<>());
                 XYChart.Series<Long,Long> series = (XYChart.Series<Long,Long>) markerModeChart.getData().get(1);
+                // put 1-st dot to the future line
                 series.getData().add(new XYChart.Data<>(xValueLong,yValueLong));
                 series.getData().add(new XYChart.Data<>(xValueLong++,yValueLong++)); //end point of line
-                styleChartLine(markerModeChart, chartColorMap.get(markerModeChart));
+                //styleChartLine(markerModeChart, chartColorMap.get(markerModeChart));
+                styleChartLine(markerModeChart, Color.web(chartPropertyMap.get(markerModeChart).getChartColor()));
 
             }
          
@@ -153,13 +164,14 @@ public class MarkerChart extends StackPane {
             if (chartMode == ChartModes.MARKER && selectedCheckBox() != null){
                 Long xValueLong = Math.round((double)markerModeChart.getXAxis().getValueForDisplay(event.getX()));
                 Long yValueLong = Math.round((double)markerModeChart.getYAxis().getValueForDisplay(event.getY()));
-
+                // put last dot in the line
                 XYChart.Series<Long,Long> series = (XYChart.Series<Long,Long>) markerModeChart.getData().get(1);
                 series.getData().add(new XYChart.Data<>(xValueLong,yValueLong));
             }
         });
         mChart.setOnMouseDragged((event) -> {
             mChart.getOnMouseMoved().handle(event);
+            System.out.println("bind->setOnMouseDragged"+event.getSource()+" hooverChart="+hooverChart);
             if (chartMode == ChartModes.MARKER && selectedCheckBox() != null){
                 detailsPopup.setVisible(false);
                 Long xValueLong = Math.round((double)markerModeChart.getXAxis().getValueForDisplay(event.getX()));
@@ -168,9 +180,14 @@ public class MarkerChart extends StackPane {
                 XYChart.Series<Long,Long> series = (XYChart.Series<Long,Long>) markerModeChart.getData().get(1);
                 int ind= series.getData().size()-1;
                 //System.out.println("Series size="+ ind);
+                // remove dot we added to start drawing when we press button to avoid duplication
                 series.getData().remove(ind);
+                // adding segments of the line
                 series.getData().add(new XYChart.Data<>(xValueLong,yValueLong));
                 //styleChartLine(markerModeChart, chartColorMap.get(markerModeChart));
+            }
+            else if (hooverChart != null){
+                custLib.customize(hooverChart);
             }
     
         });
@@ -291,29 +308,39 @@ public class MarkerChart extends StackPane {
         //constructor. for the rest of series new linecharts have to be created.
         LineChart lineChart;
         seriesCounter++;
-        NumberAxis yAxis = new NumberAxis();
-        NumberAxis xAxis = new NumberAxis();
+//        NumberAxis yAxis = new NumberAxis();
+//        NumberAxis xAxis = new NumberAxis();
 
         // style x-axis
-        xAxis.setAutoRanging(false);
-        xAxis.setVisible(false);
-        xAxis.setOpacity(0.0); // somehow the upper setVisible does not work
-        xAxis.lowerBoundProperty().bind(((NumberAxis) baseChart.getXAxis()).lowerBoundProperty());
-        xAxis.upperBoundProperty().bind(((NumberAxis) baseChart.getXAxis()).upperBoundProperty());
-        xAxis.tickUnitProperty().bind(((NumberAxis) baseChart.getXAxis()).tickUnitProperty());
+//        xAxis.setAutoRanging(false);
+//        xAxis.setVisible(false);
+//        xAxis.setOpacity(0.0); // somehow the upper setVisible does not work
+//        xAxis.lowerBoundProperty().bind(((NumberAxis) baseChart.getXAxis()).lowerBoundProperty());
+//        xAxis.upperBoundProperty().bind(((NumberAxis) baseChart.getXAxis()).upperBoundProperty());
+//        xAxis.tickUnitProperty().bind(((NumberAxis) baseChart.getXAxis()).tickUnitProperty());
 
         if (seriesCounter > 1){
+            NumberAxis yAxis = new NumberAxis();
+            NumberAxis xAxis = new NumberAxis();
             // style y-axis
             yAxis.setSide(Side.RIGHT);
             yAxis.setLabel(series.getName());
+            xAxis.setAutoRanging(false);
+            xAxis.setVisible(false);
+            xAxis.setOpacity(0.0); // somehow the upper setVisible does not work
+            xAxis.lowerBoundProperty().bind(((NumberAxis) baseChart.getXAxis()).lowerBoundProperty());
+            xAxis.upperBoundProperty().bind(((NumberAxis) baseChart.getXAxis()).upperBoundProperty());
+            xAxis.tickUnitProperty().bind(((NumberAxis) baseChart.getXAxis()).tickUnitProperty());
 
             // create chart
             lineChart = new LineChart(xAxis, yAxis);
 
         } else {
             lineChart=baseChart;
-//            yAxis.setSide(Side.LEFT);
-//            yAxis.setLabel(series.getName());
+            NumberAxis xAxis = (NumberAxis) baseChart.getXAxis();
+            NumberAxis yAxis = (NumberAxis) baseChart.getYAxis();
+            yAxis.setSide(Side.LEFT);
+            yAxis.setLabel(series.getName());
         }
         lineChart.setAnimated(false);
         lineChart.setLegendVisible(false);
@@ -325,17 +352,23 @@ public class MarkerChart extends StackPane {
         styleChart(lineChart, lineColor);
         setFixedAxisWidth(lineChart);
 
-        //chartHooverMap.put(lineChart, false);
-        //chartColorMap.put(lineChart, lineColor);
+//        chartHooverMap.put(lineChart, false);
+//        chartColorMap.put(lineChart, lineColor);
         String color= new String(lineColor.toString());
         GrProperty prop = new GrProperty();
         prop.setChartColor(color);
         prop.setChartName(series.getName());
+        prop.setChartHoover(false);
         chartPropertyMap.put(lineChart, prop);
         if (seriesCounter > 1) {
             multiChart.add(seriesCounter-1,lineChart);
         }
 
+//        System.out.println("Init Content of lineChart -------------");
+//        lineChart.lookupAll("*").forEach(N -> {
+//            System.out.println(N);
+//        });
+//        System.out.println("INIT end of lineChart -------------");
     }
     
 //    EventHandler<MouseEvent> onMouseEnteredSeriesListener = 
@@ -420,7 +453,7 @@ public class MarkerChart extends StackPane {
      * handler for change property
      */
     public void handleChartProperty(LineChart chart){
-        System.out.println("proprty of chart"+ chart.getYAxis().getLabel());
+        //System.out.println("proprty of chart"+ chart.getYAxis().getLabel());
         
     }
     
@@ -559,12 +592,12 @@ public class MarkerChart extends StackPane {
     
     
     private void handleEdit() {
-        System.out.println("handleEdit");
+        //System.out.println("handleEdit");
 
     }
     
     private void handleDelete() {
-        System.out.println("handleDelete");
+        //System.out.println("handleDelete");
 
     }
     
@@ -768,8 +801,10 @@ public class MarkerChart extends StackPane {
         zeroChartView = false;
         customChartView = true;
         rebuildChart();
-        getChildren().add(new MultiGraphCustomView(this));
-        
+        //getChildren().add(new MultiGraphCustomView(this));
+        custLib = new MultiGraphCustomView(this);
+        getChildren().add(custLib);
+        //System.out.println("Custlib created = "+custLib);
     }
     
     /**
@@ -784,7 +819,7 @@ public class MarkerChart extends StackPane {
         }
     }
    
-    final void chartCustomize(){
+    final void chartCustomize(){ //this function is not used
         stackedChartView = false;
         zeroChartView = false;
         customChartView = true;
@@ -792,6 +827,7 @@ public class MarkerChart extends StackPane {
         rebuildChart();
         custLib = new MultiGraphCustomView(this);
         getChildren().add(custLib);
+        //System.out.println("Custlib created = "+custLib);
     }
     
     final void addMarkerToChart(){
@@ -813,7 +849,65 @@ public class MarkerChart extends StackPane {
         singleMarkerView = true;
         
     }
+    
+    public boolean mouseHooverChart(MouseEvent event, Long xValueLong, LineChart lineChart){
+        boolean hoover=false;
+        double tolerance;
+        Number yValueForChart = getYValueForX(lineChart, xValueLong.intValue());
+            if (yValueForChart == null) {
+                return false;
+            }
+        if (customChartView) {
+                tolerance = 1;
+            } else {
+                tolerance = 10;
+            }
+            Number yValueLower = Math.round(normalizeYValue(lineChart, event.getY() - tolerance));
+            Number yValueUpper = Math.round(normalizeYValue(lineChart, event.getY() + tolerance));
+            Number yValueUnderMouse = Math.round((double) lineChart.getYAxis().getValueForDisplay(event.getY()));
 
+            // make series line bold when mouse is near given chart's line
+            if (isMouseNearLine(yValueForChart, yValueUnderMouse, Math.abs(yValueLower.doubleValue()-yValueUpper.doubleValue()))) {
+                hoover = true;
+                if (customChartView) hooverChart = lineChart;
+
+            } else {
+                hoover = false;
+                hooverChart = null;
+            }
+        
+        return hoover;
+    }
+        private double normalizeYValue(LineChart lineChart, double value) {
+            Double val = (Double) lineChart.getYAxis().getValueForDisplay(value);
+            if (val == null) {
+                return 0;
+            } else {
+                return val;
+            }
+        }
+        private double normalizeXValue(LineChart lineChart, double value) {
+            Double val = (Double) lineChart.getXAxis().getValueForDisplay(value);
+            if (val == null) {
+                return 0;
+            } else {
+                return val;
+            }
+        }
+        
+        private boolean isMouseNearLine(Number realYValue, Number yValueUnderMouse, Double tolerance) {
+            return (Math.abs(yValueUnderMouse.doubleValue() - realYValue.doubleValue()) < tolerance);
+        }
+
+        public Number getYValueForX(LineChart chart, Number xValue) {
+            List<XYChart.Data> dataList = ((List<XYChart.Data>)((XYChart.Series)chart.getData().get(0)).getData());
+            for (XYChart.Data data : dataList) {
+                if (data.getXValue().equals(xValue)) {
+                    return (Number)data.getYValue();
+                }
+            }
+            return null;
+        }        
     //=======================
     
     private class DetailsPopup extends VBox {
@@ -839,7 +933,8 @@ public class MarkerChart extends StackPane {
 
         private HBox buildPopupRow(MouseEvent event, Long xValueLong, LineChart lineChart) {
             Label seriesName = new Label(lineChart.getYAxis().getLabel());
-            seriesName.setTextFill(chartColorMap.get(lineChart));
+            //seriesName.setTextFill(chartColorMap.get(lineChart));
+            seriesName.setTextFill(Color.web(chartPropertyMap.get(lineChart).getChartColor()));
 
             Number yValueForChart = getYValueForX(lineChart, xValueLong.intValue());
             if (yValueForChart == null) {
@@ -858,83 +953,17 @@ public class MarkerChart extends StackPane {
             return popupRow;
         }
 
-        private double normalizeYValue(LineChart lineChart, double value) {
-            Double val = (Double) lineChart.getYAxis().getValueForDisplay(value);
-            if (val == null) {
-                return 0;
-            } else {
-                return val;
-            }
-        }
-        private double normalizeXValue(LineChart lineChart, double value) {
-            Double val = (Double) lineChart.getXAxis().getValueForDisplay(value);
-            if (val == null) {
-                return 0;
-            } else {
-                return val;
-            }
-        }
-
-        private boolean isMouseNearLine(Number realYValue, Number yValueUnderMouse, Double tolerance) {
-            return (Math.abs(yValueUnderMouse.doubleValue() - realYValue.doubleValue()) < tolerance);
-        }
-
-        public Number getYValueForX(LineChart chart, Number xValue) {
-            List<XYChart.Data> dataList = ((List<XYChart.Data>)((XYChart.Series)chart.getData().get(0)).getData());
-            for (XYChart.Data data : dataList) {
-                if (data.getXValue().equals(xValue)) {
-                    return (Number)data.getYValue();
-                }
-            }
-            return null;
-        }
         private void chartGlow(MouseEvent event, Long xValueLong, LineChart lineChart) {
-            Label seriesName = new Label(lineChart.getYAxis().getLabel());
-            //seriesName.setTextFill(chartColorMap.get(lineChart));
-            seriesName.setTextFill(Color.web(chartPropertyMap.get(lineChart).getChartColor()));
-            
-            
-
-            Number yValueForChart = getYValueForX(lineChart, xValueLong.intValue());
-            if (yValueForChart == null) {
-                return ;
-            }
-            double tolerance;
-            if (customChartView) {
-                tolerance = 1;
+            if (mouseHooverChart( event,  xValueLong,  lineChart)){
+                Label seriesName = new Label(lineChart.getYAxis().getLabel());
+                seriesName.setTextFill(Color.web(chartPropertyMap.get(lineChart).getChartColor()));
+                styleChartBoldLine(lineChart, Color.web(chartPropertyMap.get(lineChart).getChartColor()));
+                chartPropertyMap.get(lineChart).setChartHoover(true);
             } else {
-                tolerance = 10;
+                styleChartLine(lineChart, Color.web(chartPropertyMap.get(lineChart).getChartColor()));
+                chartPropertyMap.get(lineChart).setChartHoover(false);
             }
-            Number yValueLower = Math.round(normalizeYValue(lineChart, event.getY() - tolerance));
-            Number yValueUpper = Math.round(normalizeYValue(lineChart, event.getY() + tolerance));
-            Number yValueUnderMouse = Math.round((double) lineChart.getYAxis().getValueForDisplay(event.getY()));
 
-            // make series line bold when mouse is near given chart's line
-            if (isMouseNearLine(yValueForChart, yValueUnderMouse, Math.abs(yValueLower.doubleValue()-yValueUpper.doubleValue()))) {
-                //if (chartHooverMap.get(lineChart) == false) {    // to avoid redrawing if chart was not hoovered yet but is hoovered now
-                //if (chartPropertyMap.get(lineChart).getChartHoover()) {   // to avoid redrawing if chart was not hoovered yet but is hoovered now
-                    //styleChartBoldLine(lineChart, chartColorMap.get(lineChart));
-                    styleChartBoldLine(lineChart, Color.web(chartPropertyMap.get(lineChart).getChartColor()));
-                    chartPropertyMap.get(lineChart).setChartHoover(true);
-                    //chartHooverMap.put(lineChart, true);
-                    if (customChartView){
-                        custLib.customize(lineChart);
-                        System.out.println("hooveredChart = chart ->"+chartPropertyMap.get(lineChart).getChartHoover());
-                    }
-                    
-                //}
-            } else {
-                //if (chartHooverMap.get(lineChart)) {    // to avoid redrawingif chart was  hoovered before and not hovered now
-                //if (chartPropertyMap.get(lineChart).getChartHoover()) {   // to avoid redrawing if chart was not hoovered yet but is hoovered now
-                    //styleChartLine(lineChart, chartColorMap.get(lineChart));
-                    styleChartLine(lineChart, Color.web(chartPropertyMap.get(lineChart).getChartColor()));
-                    //chartHooverMap.put(lineChart, false);
-                    chartPropertyMap.get(lineChart).setChartHoover(false);
-                    hooverChart = null;
-                //}
-            }
-            //System.out.println("hooveredChart = chart ->"+chartPropertyMap.get(lineChart).getChartHoover());
-           
         }
     }
     

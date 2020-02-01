@@ -21,19 +21,20 @@ import javafx.beans.value.ObservableValue;
  * @author us
  */
 public class GrProperty {
-    //private  IntegerProperty legendNum; // number on the Legend list
-    private  StringProperty chartDataFile;   // SCV file name with data
-    private  StringProperty chartName;  // Tag chart on Legend. Default is dataFile
-    private  BooleanProperty chartCB;  // Checkbox Hide/Show chart on the graph. Checked to Show
-    private  DoubleProperty xShift; // Shift curve along X axis.
-    private  DoubleProperty xScale; // Scale along X axis.
-    private  DoubleProperty yShift; // Shift curve along Y axis.
-    private  DoubleProperty yScale; // Scale along Y axis.
-    private  StringProperty chartColor; // char Color on the graph
-    private  IntegerProperty xUnits;      // index of Unit on from ObservableList of xUnits
-    private  StringProperty xUnit;      // value of xUnit
-    private  StringProperty yUnit;      // value for yUnit
-    private  StringProperty dateFormat; // date time string format. used to decode data timestamp
+    //private  IntegerProperty legendNum;   // number on the Legend list
+    private  StringProperty chartDataFile;  // SCV file name with data
+    private  StringProperty chartName;      // Tag chart on Legend. Default is dataFile
+    private  BooleanProperty chartCB;       // Checkbox Hide/Show chart on the graph. Checked to Show
+    private  DoubleProperty xShift;         // Shift curve along X axis.
+    private  DoubleProperty xScale;         // Scale along X axis.
+    private  DoubleProperty yShift;         // Shift curve along Y axis.
+    private  DoubleProperty yScale;         // Scale along Y axis.
+    private  StringProperty chartColor;     // char Color on the graph
+    private  IntegerProperty xUnits;        // index of Unit on from ObservableList of xUnits
+    private  StringProperty xUnit;          // value of xUnit
+    private  StringProperty yUnit;          // value for yUnit
+    private  StringProperty dateFormat;     // date time string format. used to decode data timestamp
+    private  BooleanProperty chartHoover;    // true is chart under cursor
     
     public GrProperty(){
         initialization();
@@ -52,6 +53,7 @@ public class GrProperty {
         this.xUnit = new SimpleStringProperty("");      // value not set
         this.yUnit = new SimpleStringProperty("");      // value not set
         this.dateFormat = new SimpleStringProperty("yyyy.MM.dd HH:mm");
+        this.chartHoover = new SimpleBooleanProperty(false); 
 
     }
     
@@ -199,6 +201,18 @@ public class GrProperty {
 
     public StringProperty dateFormatProperty() {
         return dateFormat;
+    }
+    
+    public final boolean getChartHoover() {
+        return chartHoover.get();
+    }
+
+    public final void setChartHoover(boolean value) {
+        chartHoover.set(value);
+    }
+
+    public BooleanProperty chartHooverProperty() {
+        return chartHoover;
     }
     
    

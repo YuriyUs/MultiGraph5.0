@@ -28,13 +28,13 @@ public class MultipleGraphLineChartMain extends Application {
         chart.setLegendSide(Side.BOTTOM);
         //chart.setLegendSide(Side.LEFT);
         //baseChart.getData().add(prepareSeries("Series 1", (x) -> (double)x));
-        chart.addSeries(prepareSeries("Series 1", (x) -> (double)x), Color.RED);
+//        chart.addSeries(prepareSeries("Series 1", (x) -> (double)x), Color.RED);
 
         //MarkerChart chart = new MarkerChart(baseChart, Color.RED);
         chart.addSeries(prepareSeries("Series 2", (x) -> (double)x*x),Color.BLUE);
         chart.addSeries(prepareSeries("Series 3", (x) -> (double)-x*x),Color.GREEN);
-        chart.addSeries(prepareSeries("Series 4", (x) -> ((double) (x-250))*x),Color.DARKCYAN);
-        chart.addSeries(prepareSeries("Series 5", (x) -> ((double)(x+100)*(x-200))),Color.BROWN);
+//        chart.addSeries(prepareSeries("Series 4", (x) -> ((double) (x-250))*x),Color.DARKCYAN);
+//        chart.addSeries(prepareSeries("Series 5", (x) -> ((double)(x+100)*(x-200))),Color.BROWN);
 
         primaryStage.setTitle("MarkerChart");
         

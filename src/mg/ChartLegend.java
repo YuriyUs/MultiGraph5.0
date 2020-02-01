@@ -5,6 +5,7 @@
  */
 package mg;
 
+import java.util.HashMap;
 import java.util.Map;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -39,7 +40,8 @@ public class ChartLegend extends GridPane{
     MarkerChart mChart;
     
     private       ObservableList<CheckBox> checkBoxes = FXCollections.observableArrayList();;
-    private final Map<LineChart, Color> chartColorMap;
+    //private final Map<LineChart, Color> chartColorMap;
+    private       Map<LineChart, GrProperty> chartPropertyMap;
     
     // variables to control grid in the legend
     int colIndex=0;  // currently filling column    
@@ -52,7 +54,8 @@ public class ChartLegend extends GridPane{
         //legend  = new GridPane();
         this.mChart = chart;
         this.setPadding(new Insets(2));
-        this.chartColorMap = chart.getColorMap();
+        //this.chartColorMap = chart.getColorMap();
+        this.chartPropertyMap = chart.getPropertyMap();
         if (chart.getLegendSide() == Side.LEFT || chart.getLegendSide() == Side.RIGHT){
             colSpan=0;  // legend is a vertical type: 1 column and multiple rows
             this.setVgap(5);
@@ -98,7 +101,8 @@ public class ChartLegend extends GridPane{
         userData.chart = chart;
         checkBox.setUserData(userData);
         checkBox.setSelected(true);
-        checkBox.setStyle("-fx-text-fill: " + mChart.toRGBCode(chartColorMap.get(chart)) + "; -fx-font-weight: bold");
+        //checkBox.setStyle("-fx-text-fill: " + mChart.toRGBCode(chartColorMap.get(chart)) + "; -fx-font-weight: bold");
+        checkBox.setStyle("-fx-text-fill: " + mChart.toRGBCode(Color.web(chartPropertyMap.get(chart).getChartColor())) + "; -fx-font-weight: bold");
         this.add(checkBox, colIndex,rowIndex);
         if (colIndex < colSpan){
                 colIndex++;
