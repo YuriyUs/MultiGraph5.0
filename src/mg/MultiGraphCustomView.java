@@ -109,8 +109,35 @@ public class MultiGraphCustomView extends BorderPane {
 //                    yAxis.setUpperBound(abs(upperBound)+10);
 //                    yAxis.setLowerBound(abs(lowerBound)+10);
 //                }
-
-                System.out.println("X="+xValueLong+" Y="+yValueLong+ "yAxis="+yAxis.getLabel());
+/*
+     interesting example of zooming from GtHub  https://gist.github.com/james-d/7252698
+private void doZoom(Rectangle zoomRect, LineChart<Number, Number> chart) {
+        Point2D zoomTopLeft = new Point2D(zoomRect.getX(), zoomRect.getY());
+        Point2D zoomBottomRight = new Point2D(zoomRect.getX() + zoomRect.getWidth(), zoomRect.getY() + zoomRect.getHeight());
+        final NumberAxis yAxis = (NumberAxis) chart.getYAxis();
+        Point2D yAxisInScene = yAxis.localToScene(0, 0);
+        final NumberAxis xAxis = (NumberAxis) chart.getXAxis();
+        Point2D xAxisInScene = xAxis.localToScene(0, 0);
+        double xOffset = zoomTopLeft.getX() - yAxisInScene.getX() ;
+        double yOffset = zoomBottomRight.getY() - xAxisInScene.getY();
+        double xAxisScale = xAxis.getScale();
+        double yAxisScale = yAxis.getScale();
+        xAxis.setLowerBound(xAxis.getLowerBound() + xOffset / xAxisScale);
+        xAxis.setUpperBound(xAxis.getLowerBound() + zoomRect.getWidth() / xAxisScale);
+        yAxis.setLowerBound(yAxis.getLowerBound() + yOffset / yAxisScale);
+        yAxis.setUpperBound(yAxis.getLowerBound() - zoomRect.getHeight() / yAxisScale);
+        System.out.println(yAxis.getLowerBound() + " " + yAxis.getUpperBound());
+        zoomRect.setWidth(0);
+        zoomRect.setHeight(0);
+    }
+*/
+                yAxis.setAutoRanging(false);
+                //yAxis.setForceZeroInRange(false);
+                double upperBound = yAxis.getUpperBound();
+                double lowerBound = yAxis.getLowerBound();
+                yAxis.setUpperBound(upperBound + yValueLong);
+                yAxis.setLowerBound(-upperBound - yValueLong);
+                System.out.println("X="+xValueLong+" Y="+yValueLong+ " yAxis="+yAxis.getLabel());
                 //System.out.println("x="+x+" y="+y+" top="+top+" left="+left+" bottom="+bottom+" right="+right);
                 //chartPane.setMargin(this, new Insets(15,15,15,15));
             //} else System.out.println("lineChart="+hooverChart);
